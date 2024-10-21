@@ -1,21 +1,13 @@
-from .forms import InventoryItemForm, FinancialRecordForm
-from .models import InventoryItem, FinancialRecord
-from django.db.models import F, FloatField
-from .forms import InventoryFilterForm
-from django.db.models import F, FloatField
+from .forms import InventoryItemForm, FinancialRecordForm, ApprovementForm
 from .forms import InventoryFilterForm
 from .forms import InventoryItemForm, FinancialRecordForm
-from .models import InventoryItem, FinancialRecord
-
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
 from django.db.models import Sum, F, FloatField
 from .models import InventoryItem, FinancialRecord
 
-# Function to check if the user is a superuser
+
 def superuser_required(user):
     return user.is_superuser
-
 # Protecting the admin dashboard with login and superuser requirement
 @login_required
 @user_passes_test(superuser_required)
@@ -123,18 +115,6 @@ def add_financial_record(request):
     return render(request, 'admin/add_financial_record.html', {'form': form})
 
 
-def edit_financial_record(request, pk):
-    record = get_object_or_404(FinancialRecord, pk=pk)
-    if request.method == 'POST':
-        form = FinancialRecordForm(request.POST, instance=record)
-        if form.is_valid():
-            form.save()
-            return redirect('financial_records')
-    else:
-        form = FinancialRecordForm(instance=record)
-    return render(request, 'admin/edit_financial_record.html', {'form': form})
-
-
 def delete_financial_record(request, pk):
     record = get_object_or_404(FinancialRecord, pk=pk)
     if request.method == 'POST':
@@ -199,7 +179,7 @@ def is_admin(user):
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from HospitalApp.models import PatientAccount, DoctorAccount
+from HospitalApp.models import PatientAccount, DoctorAccount, Appointment
 from .forms import UserForm, PatientAccountForm, DoctorAccountForm, SearchForm
 from django.core.paginator import Paginator
 import csv
@@ -320,6 +300,44 @@ def delete_account(request, pk):
 
     return render(request, 'admin/delete_account.html', {'user': user})
 
+def edit_financial_record(request, pk):
+    record = get_object_or_404(FinancialRecord, pk=pk)
+    if request.method == 'POST':
+        form = FinancialRecordForm(request.POST, instance=record)
+        if form.is_valid():
+            form.save()
+            return redirect('financial_records')
+    else:
+        form = FinancialRecordForm(instance=record)
+    return render(request, 'admin/edit_financial_record.html', {'form': form})
+
+def edit_pending_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+
+    if request.method == 'POST':
+        form = ApprovementForm(request.POST, hospital=appointment.hospital)
+        if form.is_valid():
+            approved_appointment = form.save(commit=False)
+            approved_appointment.patient = appointment.patient  # Set the patient from the original appointment
+            approved_appointment.status = 'Approved'  # Set status to approved
+            approved_appointment.appointment_date = appointment.appointment_date  # Set appointment date
+            approved_appointment.hospital = appointment.hospital  # Set hospital
+            approved_appointment.doctor = form.cleaned_data['doctor']  # Set the selected doctor
+            approved_appointment.save()
+
+            # Optionally delete the original appointment if that's the intended behavior
+            appointment.delete()
+
+            return redirect('adminhome')  # Redirect after saving
+    else:
+        form = ApprovementForm(initial={
+            'hospital': appointment.hospital,
+            'appointment_date': appointment.appointment_date,
+            'appointment_type': appointment.appointment_type,
+            'doctor': appointment.doctor  # Pre-fill with the original doctor's information if applicable
+        })
+
+    return render(request, 'admin/edit_pending.html', {'form': form, 'appointment': appointment})
 
 def view_account(request, pk):
     user = get_object_or_404(User, pk=pk)
@@ -354,7 +372,7 @@ def export_accounts_csv(request):
 
     writer = csv.writer(response)
     writer.writerow(['Username', 'Email', 'First Name', 'Last Name', 'Role', 'Phone Number', 'Address', 'Specialty',
-                     'Years of Experience'])
+    'Years of Experience'])
 
     users = User.objects.all().order_by('-date_joined')
     for user in users:
@@ -393,3 +411,7 @@ def export_accounts_csv(request):
         ])
 
     return response
+
+def pending_appointments(request):
+    appointments = Appointment.objects.order_by('-appointment_date')
+    return render(request, 'admin/pending_appointments.html', {'appointments': appointments})

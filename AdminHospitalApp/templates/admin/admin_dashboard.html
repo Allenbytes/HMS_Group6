@@ -345,6 +345,12 @@
                     <i class="fas fa-user-cog"></i> Account Management
                 </a>
             </li>
+             <li>
+                
+                <a href="{% url 'pending_appointments' %}" class="{% if request.resolver_match.url_name == 'account_management' %}active{% endif %}">
+                    <i class="fas fa-user-cog"></i> Pending Appointments
+                </a>
+            </li>
         </ul>
     </aside>
 

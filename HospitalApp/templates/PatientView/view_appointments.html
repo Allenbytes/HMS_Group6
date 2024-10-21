@@ -6,6 +6,20 @@
     <title>Your Appointments</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .stat_pending{
+            background-color: yellow;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .stat_approved{
+            background-color: green;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
         body {
             background-color: #f4f6f9;
         }
@@ -47,6 +61,10 @@
         .nav-link{
             color: #007bff;
         }
+        
+        a{
+            color:#007bff;
+        }
     </style>
 </head>
 <body>
@@ -68,19 +86,63 @@
     </nav>
 
     <div class="container mt-5">
-        <h2>Your Appointments</h2>
-        
-        <ul>
-            {% for appointment in appointments %}
+    <h2>Your Appointments</h2>
+    
+    <ul>
+    {% if appointments %}
+        <h3>Your Appointments</h3>
+        {% for appointment in appointments %}
             <li>
-                <strong>{{ appointment.appointment_type }}</strong> with Dr. {{ appointment.doctor.user.username }} on {{ appointment.appointment_date }} 
-                <br>(Status: {{ appointment.status }})
+                <strong>{{ appointment.appointment_type }}</strong> 
+                at {{ appointment.hospital }} 
+                on {{ appointment.appointment_date }} 
+                <br> 
+                <p class="stat_pending">Status: {{ appointment.status }}</p>
+                
+                {% if appointment.status == "Approved" %}
+                    {% if appointment.doctor %}
+                        <p><strong>Doctor:</strong> {{ appointment.doctor.username }}</p>
+                    {% else %}
+                        <p>No doctor assigned for this appointment.</p>
+                    {% endif %}
+                {% endif %}
             </li>
-            {% empty %}
+        {% empty %}
             <li>No appointments found.</li>
-            {% endfor %}
-        </ul>
-    </div>
+        {% endfor %}
+    {% else %}
+        <li>No appointments found.</li>
+    {% endif %}
+    
+    {% if approved_appointments %}
+        <h3>Approved Appointments</h3>
+        {% for approved in approved_appointments %}
+            <li>
+                <strong>{{ approved.appointment_type }}</strong> 
+                at {{ approved.hospital }} 
+                on {{ approved.appointment_date }} 
+                <br> 
+                <p class="stat_approved">Status: {{ approved.status }}</p>
+                
+                {% if approved.status == "Approved" %}
+                    {% if approved.doctor %}
+                        <p><strong>Doctor:</strong> {{ approved.doctor.username }}</p>
+                    {% else %}
+                        <p>No doctor assigned for this appointment.</p>
+                    {% endif %}
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>No approved appointments found.</li>
+        {% endfor %}
+    {% else %}
+        <li>No approved appointments found.</li>
+    {% endif %}
+</ul>
+
+
+</div>
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

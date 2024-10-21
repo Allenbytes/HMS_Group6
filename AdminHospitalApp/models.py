@@ -36,3 +36,20 @@ class AdminProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class Approvement(models.Model):
+    patient = models.ForeignKey(User, related_name='approved_appointments', on_delete=models.CASCADE)
+    hospital = models.CharField(max_length=50, choices=[
+        ('Sacred Heart Medical Center', 'Sacred Heart Medical Center'),
+        ('Angeles University Foundation Medical Center', 'Angeles University Foundation Medical Center')
+    ])
+    appointment_date = models.DateTimeField()
+    appointment_type = models.CharField(max_length=50, choices=[
+        ('Check-up', 'Check-up'),
+        ('Consultation', 'Consultation')
+    ])
+    status = models.CharField(max_length=20, default='Approved')
+    doctor = models.ForeignKey(User, related_name='assigned_appointments', on_delete=models.CASCADE)  # New field for assigned doctor
+
+    def __str__(self):
+        return f"{self.patient.username} - {self.appointment_type} with {self.hospital} on {self.appointment_date}"

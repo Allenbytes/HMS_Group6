@@ -26,5 +26,7 @@ path('accounts/', views.account_list, name='account_list'),
     path('accounts/delete/<int:pk>/', views.delete_account, name='delete_account'),
     path('accounts/export/csv/', views.export_accounts_csv, name='export_accounts_csv'),
     path('accounts/view/<int:pk>/', views.view_account, name='view_account'),
+    path('pendingappointments/', views.pending_appointments, name='pending_appointments'),
+    path('pending/edit/<int:pk>/', views.edit_pending_appointment, name='edit_pending'),
 ]
 

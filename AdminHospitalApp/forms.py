@@ -1,6 +1,31 @@
 from django import forms
 from .models import InventoryItem, FinancialRecord
+from HospitalApp.models import Appointment, DoctorAccount
 
+
+from django import forms
+from .models import Approvement
+
+class ApprovementForm(forms.ModelForm):
+    appointment_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M']
+    )
+
+    class Meta:
+        model = Approvement
+        fields = ['hospital', 'appointment_date', 'appointment_type', 'doctor']
+
+    def __init__(self, *args, **kwargs):
+        # Capture the hospital value from kwargs if it exists
+        self.hospital = kwargs.pop('hospital', None)
+        super(ApprovementForm, self).__init__(*args, **kwargs)
+
+        # Dynamically populate the doctor choices based on the hospital
+        if self.hospital:
+            self.fields['doctor'].queryset = User.objects.filter(
+                doctoraccount__assigned_hospital=self.hospital
+            )
 
 class InventoryItemForm(forms.ModelForm):
     class Meta:

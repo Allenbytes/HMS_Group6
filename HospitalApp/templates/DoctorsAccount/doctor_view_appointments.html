@@ -6,6 +6,13 @@
     <title>Doctor Dashboard - Appointments</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .stat_approved{
+            background-color: green;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
         body {
             background-color: #e9ecef;
             font-family: 'Arial', sans-serif;
@@ -101,23 +108,37 @@
 
     <div class="container mt-5">
         <h2>Your Appointments</h2>
-        <ul class="appointment-list">
-            {% for appointment in appointments %}
-            <li class="appointment-item">
-                <div class="appointment-details">
-                    <div>
-                        <p><strong>Patient:</strong> {{ appointment.patient.username }}</p>
-                        <p><strong>Appointment Type:</strong> {{ appointment.appointment_type }}</p>
-                    </div>
-                    <div>
-                        <p class="appointment-date">{{ appointment.appointment_date }}</p>
-                        <p class="status {{ appointment.status|lower }}">{{ appointment.status }}</p>
-                    </div>
-                </div>
+        <ul class="appointment-list">{% if approved_appointments %}
+    <h3>Approved Appointments</h3>
+    <ul>
+        {% for approved in approved_appointments %}
+            <li>
+                <strong>Patient:</strong> {{ approved.patient.username }} <!-- Show the patient's username -->
+                <br>
+                <strong>Appointment Type:</strong> {{ approved.appointment_type }} 
+                <br>
+                <strong>Hospital:</strong> {{ approved.hospital }} 
+                <br>
+                <strong>Date:</strong> {{ approved.appointment_date }} 
+                <br> 
+                <p class="stat_approved">Status: {{ approved.status }}</p>
+                
+                {% if approved.status == "Approved" %}
+                    {% if approved.doctor %}
+                        <p><strong>Doctor:</strong> {{ approved.doctor.username }}</p>
+                    {% else %}
+                        <p>No doctor assigned for this appointment.</p>
+                    {% endif %}
+                {% endif %}
             </li>
-            {% empty %}
-            <li class="no-appointments">No appointments found.</li>
-            {% endfor %}
+        {% empty %}
+            <li>No approved appointments found.</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <li>No approved appointments found.</li>
+{% endif %}
+
         </ul>
     </div>
 

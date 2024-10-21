@@ -79,6 +79,7 @@
         <h2>Welcome, Dr. {{ doctor_profile.user.username }}</h2>
         
         <div class="doctor-info">
+            <p><strong>Assigned at:</strong>{{ doctor_profile.assigned_hospital }}</p>
             <p><strong>Specialty:</strong> {{ doctor_profile.specialty }}</p>
             <p><strong>Contact Information:</strong> {{ doctor_profile.contact_info }}</p>
         </div>

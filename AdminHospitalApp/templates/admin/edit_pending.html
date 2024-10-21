@@ -1,0 +1,12 @@
+{% extends 'admin/admin_dashboard.html' %}
+
+{% block content %}
+  <h2>Edit Appointment</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+      
+    <button type="submit">Approve</button>
+  </form>
+  <a href="{% url 'pending_appointments' %}">Cancel</a>
+{% endblock %}

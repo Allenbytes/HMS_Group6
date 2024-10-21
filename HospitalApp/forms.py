@@ -2,7 +2,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import PatientAccount, DoctorAccount, Appointment
-from django.utils import timezone
 
 
 class AppointmentForm(forms.ModelForm):
@@ -13,7 +12,7 @@ class AppointmentForm(forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ['doctor', 'appointment_date', 'appointment_type']
+        fields = ['hospital', 'appointment_date', 'appointment_type']
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -28,14 +27,27 @@ class PatientSignupForm(UserCreationForm):
         model = User
         fields = ['username', 'password1', 'password2', 'phone_number', 'address']
 
+
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+
 class DoctorSignupForm(UserCreationForm):
     specialty = forms.CharField(max_length=100)
     qualification = forms.CharField(widget=forms.Textarea, required=False)
     years_of_experience = forms.IntegerField(min_value=1)
 
+    # Correctly use forms.ChoiceField for assigned_hospital
+    assigned_hospital = forms.ChoiceField(choices=[
+        ('Sacred Heart Medical Center', 'Sacred Heart Medical Center'),
+        ('Angeles University Foundation Medical Center', 'Angeles University Foundation Medical Center')
+    ])
+
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'specialty', 'qualification', 'years_of_experience']
+        fields = ['username', 'password1', 'password2', 'specialty', 'qualification', 'years_of_experience',
+                  'assigned_hospital']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -46,7 +58,8 @@ class DoctorSignupForm(UserCreationForm):
                 specialty=self.cleaned_data['specialty'],
                 qualification=self.cleaned_data['qualification'],
                 years_of_experience=self.cleaned_data['years_of_experience'],
-                is_doctor=True
+                is_doctor=True,
+                assigned_hospital=self.cleaned_data['assigned_hospital']
             )
         return user
 

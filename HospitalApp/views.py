@@ -11,6 +11,7 @@ from .forms import PatientSignupForm, AppointmentForm
 from .forms import UserForm, PatientAccountForm, VerifyAccountForm
 from .models import Appointment
 from .models import DoctorAccount
+from AdminHospitalApp.models import Approvement
 
 def is_doctor(user):
     return hasattr(user, 'doctoraccount')
@@ -142,15 +143,19 @@ def schedule_appointment(request):
 @user_passes_test(is_patient)
 def view_appointments(request):
     appointments = Appointment.objects.filter(patient=request.user).order_by('-appointment_date')
-    return render(request, 'PatientView/view_appointments.html', {'appointments': appointments})
+    approved_appointments = Approvement.objects.filter(patient=request.user).order_by('-appointment_date')
+    return render(request, 'PatientView/view_appointments.html', {
+        'appointments': appointments,
+        'approved_appointments': approved_appointments
+    })
 
 @login_required
 @user_passes_test(is_doctor)
 def doctor_view_appointments(request):
     doctor = DoctorAccount.objects.get(user=request.user)
-    appointments = Appointment.objects.filter(doctor=doctor).order_by('-appointment_date')
-    return render(request, 'DoctorsAccount/doctor_view_appointments.html', {'appointments': appointments})
-
+    approved_appointments = Approvement.objects.filter(doctor=doctor.user).order_by('-appointment_date')
+    return render(request, 'DoctorsAccount/doctor_view_appointments.html',
+    {'approved_appointments': approved_appointments})
 @login_required
 def verify_account(request):
     try:
